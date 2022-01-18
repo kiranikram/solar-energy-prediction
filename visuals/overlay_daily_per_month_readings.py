@@ -12,12 +12,6 @@ df = pd.read_csv(os.path.join(PATH, 'data', 'sunrock_raw.csv'), header=0)
 total_list = df['Total'].tolist()
 dates_list = df['DateTime'].tolist()
 
-#total_list = total_list[96: 96 *2]
-#dates_list = dates_list[96: 96 *2] 
-
-#total_list = []
-x = []
-
 print(len(total_list) / 96)
 
 y = total_list[0:96]
@@ -32,7 +26,8 @@ for i in range(24):
     x_label.append(hour + ':45')
 
 
-#plt.xlabel(x_label, fontsize=8)
+plt.ylabel('Solar energy production (kWh).')
+plt.xlabel('Time of day (15 min intervals)')
 #plt.xticks(rotation=45)
 for i in range(int(len(total_list) / 96)):
     plt.plot(total_list[i * 96: 96 * (i+1)], label = "Day {}".format(i))

@@ -1,0 +1,20 @@
+# Build results
+
+[Ll]og/
+.vscode/*
+
+*.pyc
+*.pt
+*.log
+*.pth
+*.pyc
+
+__pycache__/
+
+document/*.pdf
+
+document/*.gz
+
+*.err
+*.output
+

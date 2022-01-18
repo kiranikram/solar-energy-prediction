@@ -1,8 +1,5 @@
-import os
-import random
-import re
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils import data
 from PIL import Image as PILImage
@@ -17,35 +14,27 @@ class DatasetSolar(data.Dataset):
         self.output_feature = kwargs['output_feature']
 
         self.data_df = pd.read_csv(self.data_path)
+        self.sliding_windows_X = np.array(list(self.window(self.data_df[self.categorical_features].values, self.seq_length)))
+        self.sliding_windows_Y = np.array(list(self.window(self.data_df[self.output_feature].values, self.seq_length)))
 
-    def load_img(self, img_path):
-        image = np.array(PILImage.open(img_path))
-        image_original = self.transform_img(image)
-        return image_original
+    def window(self, iterable, size=2):
+        i = iter(iterable)
+        win = []
+        for e in range(0, size):
+            win.append(next(i))
+        yield win
+        for e in i:
+            win = win[1:] + [e]
+            yield win
 
     def __len__(self):
-        return len(self.data_df)
+        return len(self.sliding_windows_X) - 1
 
     def __getitem__(self, idx):
 
-        no_items = len(self.data_df)
-        parts = int(no_items / self.seq_length)
-        start_sequence = random.randint(1, parts - 1) * self.seq_length
+        X = torch.tensor(self.sliding_windows_X[idx], dtype=torch.long)
+        y = torch.tensor(self.sliding_windows_Y[idx])
+        #y_t1 = torch.tensor(self.sliding_windows_Y[idx + 1])
+        y_t1 = torch.tensor(self.sliding_windows_Y[idx + 1][-1])
 
-        no_items = len(self.data_df)
-        parts = int(no_items / self.seq_length)
-        start_sequence = random.randint(1, parts - 1) * self.seq_length
-
-        sequence_ids = [start_sequence + i for i in range(self.seq_length)]
-
-        X_list = []
-        y_list = []
-
-        #for i in range(idx, idx + self.seq_length):
-        for i in sequence_ids:
-            X_list.append(torch.tensor(self.data_df.iloc[i][self.categorical_features].values, dtype=torch.long))
-            y_list.append(self.data_df.iloc[i][self.output_feature])
-
-        X_list = torch.stack(X_list, dim=0) 
-
-        return X_list, torch.tensor(y_list)
+        return X, y, y_t1

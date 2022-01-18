@@ -1,16 +1,12 @@
 
 import os
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 PATH  =  os.path.dirname(os.path.abspath(__file__))
 
-df = pd.read_csv(os.path.join(PATH, '..\\' 'data', 'sunrock_raw.csv'), header=0)
-
+df = pd.read_csv(os.path.join(PATH, '..\\' 'data', 'sunrock_raw_april.csv'), header=0)
 df['DateTime'] = pd.to_datetime(df['DateTime'], format='%d/%m/%Y %H:%M')
-
-# 01/04/2020 00:00,0
-
 
 
 df['day'] = df['DateTime'].dt.day
@@ -39,6 +35,11 @@ emb_dims = [(x, min(50, (x + 1) // 2)) for x in cat_dims]
 
 print(emb_dims)
 
+# Normalise the data
+#scaler = StandardScaler()
+#df['Total'] = scaler.fit_transform(df['Total'].values.reshape(-1, 1))
 
-#df.to_csv(os.path.join(PATH, '..\\' 'data', 'sunrock_clean.csv'), index=False)
+df['Total'] = df['Total'].apply(lambda x: x / 100)
+
+df.to_csv(os.path.join(PATH, '..\\' 'data', 'sunrock_clean_april.csv'), index=False)
 

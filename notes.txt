@@ -1,0 +1,26 @@
+cd Work/solar-energy-prediction/batch_jobs
+
+sbatch train.sh
+
+
+
+    for i in range(100):
+        x = torch.Tensor([data[i]])
+        x = x.unsqueeze(0).long().to(DEVICE)
+        
+        y = torch.Tensor([Y[i]])
+        y = y.to(DEVICE)
+
+        y_t1 = Y[i + 1]
+
+        with torch.no_grad():
+            output = model(x, y)
+            output = output.cpu().item()
+            print(y_t1, ':', output)
+            actual_results.append(y_t1 * 100)
+            future_preditions.append(output * 100)
+
+    
+    #ground_truths = scaler.inverse_transform(np.array(actual_results).reshape(-1, 1))
+
+    #predictions = scaler.inverse_transform(np.array(future_preditions).reshape(-1, 1))
