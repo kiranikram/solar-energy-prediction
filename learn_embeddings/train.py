@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.utils.data as data
 
-from model import FeedForwardNN
+from models.lstm import FeedForwardNN
 from tabular_dataset import TabularDataset
 
 PATH  =  os.path.dirname(os.path.abspath(__file__))

@@ -10,8 +10,8 @@ import csv
 from torch.utils.data import  DataLoader
 from sklearn.preprocessing import StandardScaler
 
-from dataset_solar import DatasetSolar
-from model import LSTM
+from datasets.dataset_solar import DatasetSolar
+from models.lstm import LSTM
 from lib import plot_utils, utils
 
 PATH  =  os.path.dirname(os.path.abspath(__file__))

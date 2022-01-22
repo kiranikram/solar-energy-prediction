@@ -25,7 +25,6 @@ class LSTM(nn.Module):
         self.minute_emb = nn.Embedding(emb_sizes[3][0], emb_sizes[3][1])
         
         self.fc1 = nn.Linear(lstm_hidden_size, lstm_hidden_size // 2)
-
         self.fc2 = nn.Linear(lstm_hidden_size // 2, num_outputs)
         self.device = device
 
@@ -36,7 +35,6 @@ class LSTM(nn.Module):
         x_hour = self.hour_emb(x[:, :, 2:3])
         x_minute = self.minute_emb(x[:, :, 3:4])
 
-        #x = torch.cat([x_day, x_month, x_hour, x_minute])
         y = y.reshape(y.shape[0], y.shape[1], 1, 1)
         x = torch.cat([x_day, x_month, x_hour, x_minute, y], dim=3)
         x = x.squeeze(2)

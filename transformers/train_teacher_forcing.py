@@ -1,4 +1,3 @@
-from model import Transformer
 from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
@@ -7,7 +6,8 @@ import logging
 import time # debugging
 from plot import *
 from helpers import *
-from joblib import load
+from joblib import *
+from model import Transformer
 
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
@@ -42,6 +42,8 @@ def transformer(dataloader, EPOCH, frequency, path_to_save_model, path_to_save_l
             src = _input.permute(1,0,2).double().to(device)[:-1,:,:] # torch.Size([24, 1, 7])
             target = _input.permute(1,0,2).double().to(device)[1:,:,:] # src shifted by 1.
             prediction = model(src, device) # torch.Size([24, 1, 7])
+            t = target[:,:,0]
+            t= t.unsqueeze(-1)
             loss = criterion(prediction, target[:,:,0].unsqueeze(-1))
             loss.backward()
             optimizer.step()

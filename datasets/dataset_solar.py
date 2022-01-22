@@ -34,7 +34,6 @@ class DatasetSolar(data.Dataset):
 
         X = torch.tensor(self.sliding_windows_X[idx], dtype=torch.long)
         y = torch.tensor(self.sliding_windows_Y[idx])
-        #y_t1 = torch.tensor(self.sliding_windows_Y[idx + 1])
         y_t1 = torch.tensor(self.sliding_windows_Y[idx + 1][-1])
 
         return X, y, y_t1

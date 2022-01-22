@@ -1,4 +1,4 @@
-from model import Transformer
+ 
 from torch.utils.data import DataLoader
 import torch
 import torch.nn as nn
@@ -10,6 +10,7 @@ from helpers import *
 from joblib import load
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import math, random
+from model import Transformer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s %(message)s", datefmt="[%Y-%m-%d %H:%M:%S]")
 logger = logging.getLogger(__name__)
