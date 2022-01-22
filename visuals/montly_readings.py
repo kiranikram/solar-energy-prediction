@@ -9,10 +9,8 @@ from calendar import monthrange
 import warnings
 warnings.filterwarnings("ignore")
 
-PATH  =  os.path.dirname(os.path.abspath(__file__))
 
-fig, axs = plt.subplots(6, 2, gridspec_kw={'hspace': 0.5}, sharey=True)
-plt.tight_layout()
+PATH  =  os.path.dirname(os.path.abspath(__file__))
 
 def get_xlabels():
     x_labels = []
@@ -33,7 +31,7 @@ def get_xlabels():
 
     return x_labels
 
-def plot_monthly_data(idx, x0, df, year):
+def plot_data(df, year, axs, idx=0, x0=0):
     # Loop over all months
     for month in range(1, 13):
         start_date = dt.datetime(year, month, 1, 0, 0, 0)
@@ -54,34 +52,43 @@ def plot_monthly_data(idx, x0, df, year):
 
             axs[x0, y0].plot(total_list)
             axs[x0, y0].set_title(start_date.strftime('%B') + ' ' + str(year))
+            axs[x0, y0].grid()
 
             idx += 1
 
-    return idx, x0
+    return axs, idx, x0
 
-# Read in data
-df = pd.read_csv(os.path.join(PATH, '..\\' 'data', 'sunrock_raw.csv'), header=0)
-df['DateTime'] = pd.to_datetime(df['DateTime'], format='%d/%m/%Y %H:%M')
+def main():
+
+    fig, axs = plt.subplots(6, 2, gridspec_kw={'hspace': 0.5, 'wspace': 0.1}, sharey=True)
+    plt.tight_layout()
+    plt.grid(True)
+
+    # Read in data
+    df = pd.read_csv(os.path.join(PATH, '..\\' 'data', 'sunrock_raw.csv'), header=0)
+    df['DateTime'] = pd.to_datetime(df['DateTime'], format='%d/%m/%Y %H:%M')
+
+    axs, idx, x0 = plot_data(df, 2020, axs, idx=0, x0=0)
+    plot_data(df, 2021, axs, idx, x0)
 
 
-idx = 0
-x0 = 0
-idx, x0 = plot_monthly_data(idx, x0, df, 2020)
+    x_labels = get_xlabels()
+    fig.subplots_adjust(hspace=0.2)
 
-idx, x0 = plot_monthly_data(idx, x0, df, 2021)
+    for ax in axs.flat:
+        ax.set(ylabel='(kWh)')
 
-x_labels = get_xlabels()
-fig.subplots_adjust(hspace=0.2)
+    #axs.set_title('Solar panel production for April 2020')
+    #axs.set_ylabel('Solar energy production (kWh).')
+    #axs.set_xlabel('Time of day (15 min intervals)')
+    #axs.set_xticklabels(x_labels, rotation = 90)
+    #axs.set_xticks(ticks=range(0,len(x_labels)))
 
-for ax in axs.flat:
-    ax.set(ylabel='(kWh)')
+    plt.grid(axis = 'y')
+    plt.show()
 
-#axs.set_title('Solar panel production for April 2020')
-#axs.set_ylabel('Solar energy production (kWh).')
-#axs.set_xlabel('Time of day (15 min intervals)')
-#axs.set_xticklabels(x_labels, rotation = 90)
-#axs.set_xticks(ticks=range(0,len(x_labels)))
+    t =1
 
-plt.show()
+if __name__ == "__main__":
+    main()
 
-t =1
