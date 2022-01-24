@@ -34,6 +34,6 @@ for i in range(int(len(total_list) / 96)):
 
 plt.xticks(ticks=range(0,len(x_label)) ,labels=x_label, rotation = 45)
 #plt.legend()
-plt.suptitle('Solar panel production')
+plt.suptitle('Daily Solar panel production')
 plt.show()
 p = 1

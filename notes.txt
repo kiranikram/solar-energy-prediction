@@ -2,6 +2,9 @@ cd Work/solar-energy-prediction/batch_jobs
 
 sbatch train.sh
 
+sbatch predict_transformer.sh
+sbatch train_transformer.sh
+
 
 
     for i in range(100):
@@ -24,3 +27,17 @@ sbatch train.sh
     #ground_truths = scaler.inverse_transform(np.array(actual_results).reshape(-1, 1))
 
     #predictions = scaler.inverse_transform(np.array(future_preditions).reshape(-1, 1))
+
+
+
+
+    test_val_split_size = int(len(df) * 0.2)
+
+test_val_split_indicies = np.random.choice(len(df) - 1, test_val_split_size, replace=False)
+test_indices = test_val_split_indicies[0: int(len(test_val_split_indicies)/ 2)]
+val_indices = test_val_split_indicies[int(len(test_val_split_indicies)/ 2): ]
+
+df_test = df.loc[test_indices]
+df = df.drop(test_indices)
+df_val = df.loc[val_indices]
+df = df.drop(val_indices)

@@ -15,7 +15,7 @@ class DatasetTransformer(data.Dataset):
         self.categorical_features = kwargs['categorical_features']
         self.output_feature = kwargs['output_feature']
 
-        self.features.append(self.output_feature)
+        #self.features.append(self.output_feature)
 
         self.data_df = pd.read_csv(self.data_path)
 
@@ -29,6 +29,6 @@ class DatasetTransformer(data.Dataset):
         X = torch.tensor(self.data_df[self.features].loc[start : start + self.seq_length - 1].values)
         X_Emb = torch.tensor(self.data_df[self.categorical_features].loc[start : start + self.seq_length - 1].values, dtype=torch.long)
         #print(start + 1, (start + 1) + self.seq_length -1)
-        y = torch.tensor(self.data_df[self.output_feature].loc[start + 1 : (start + 1) + self.seq_length -1].values)
+        y_1 = torch.tensor(self.data_df[self.output_feature].loc[start + 1 : (start + 1) + self.seq_length -1].values)
 
-        return X, X_Emb, y
+        return X, X_Emb, y_1
