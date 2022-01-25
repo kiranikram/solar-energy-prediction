@@ -3,7 +3,6 @@ import csv
 import datetime
 import logging
 import os
-#from joblib import load
 import pandas as pd
 import torch
 import matplotlib.pyplot as plt
@@ -20,10 +19,9 @@ logging.basicConfig(level=LOG_LEVEL)
 def get_args_parser():
     parser = argparse.ArgumentParser('Solar panel production prediction', add_help=False)
     parser.add_argument('--env', type=str, default="laptop", help='Enviroment [default: laptop]')
-    parser.add_argument('--epochs', default=10, type=int)
+    parser.add_argument('--epochs', default=30, type=int)
     parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--seq_length', default=1, type=int)
-    parser.add_argument('--num_layers', default=4, type=int)
 
     return parser.parse_args()
     
@@ -34,32 +32,12 @@ def main():
     APPLICATION = 'transfomer_{}_{}'.format(args.epochs, MODEL_NUM_LAYERS)
     data_path = os.path.join(PATH, 'data', 'sunrock_clean_pe_april.csv')
 
-    # parameters for the dataset
-    dataset_params = {
-        'data_path': data_path,
-        'seq_length' : args.seq_length,
-        'device' : DEVICE,
-        'features' : TRANSFOMERS_FEATURES,
-        'categorical_features' : CATEGORICAL_FEATURES,
-        'output_feature' : OUTPUT_FEATURE
-    }
-    
-    train_dataset = DatasetTransformer(**dataset_params)
-    dataloader_params = {'shuffle': False, 'batch_size': args.batch_size}
-    data_loader = DataLoader(train_dataset, **dataloader_params)
-
     model = Transformer(feature_size=MODEL_FEATURE_SIZE, num_layers=MODEL_NUM_LAYERS, dropout=0, emb_sizes=EMBEDDING_SIZES_TRANSFORMERS).double().to(DEVICE)
 
     model_path = os.path.join('saved_models', "{}.pth".format(APPLICATION))
     model.load_state_dict(torch.load(model_path))
     model = model.to(DEVICE)
     model.eval()
-
-    #label_encoder_day = load(os.path.join(PATH, 'encoders', 'label_encoder_day.joblib'))
-    #label_encoder_hour = load(os.path.join(PATH, 'encoders', 'label_encoder_hour.joblib'))
-    #label_encoder_minute = load(os.path.join(PATH, 'encoders', 'label_encoder_minute.joblib'))
-    #label_encoder_month = load(os.path.join(PATH, 'encoders', 'label_encoder_month.joblib'))
-
 
     df = pd.read_csv(data_path)
     df['DateTime'] = pd.to_datetime(df['DateTime'])
@@ -96,13 +74,6 @@ def main():
 
                 if(idx_ptu == 0 and index < len(df) - 1):
                     df.iloc[index + 1, df.columns.get_loc('Total')] = y_1.item()
-
-            #day = label_encoder_day.inverse_transform([[int(row.day)]])
-            #month = label_encoder_month.inverse_transform([[int(row.month)]]) 
-            #hour = label_encoder_hour.inverse_transform([[int(row.hour)]])
-            #minute = label_encoder_minute.inverse_transform([[int(row.minute)]])
-
-            #dt = datetime.datetime(2021, month[0], day[0], hour[0], minute[0])
 
             ptu_preditions.insert(0,  row.DateTime.strftime('%Y/%m/%d %H:%M'))
             writer.writerow(ptu_preditions)

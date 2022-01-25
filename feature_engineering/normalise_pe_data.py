@@ -58,6 +58,7 @@ print(emb_dims)
 
 df['Total'] = df['Total'].apply(lambda x: x / 100)
 
+df.to_csv(os.path.join(PATH, '..\\' 'data', 'sunrock_clean_spring_all.csv'), index=False)
 
 # Split the data into train and test, validation
 # Randomly get datapoints

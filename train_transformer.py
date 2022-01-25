@@ -21,7 +21,7 @@ def get_args_parser():
     parser = argparse.ArgumentParser('Solar panel production prediction', add_help=False)
     parser.add_argument('--env', type=str, default="laptop", help='Enviroment [default: laptop]')
     parser.add_argument('--lr', default=0.0001 , type=float)
-    parser.add_argument('--epochs', default=20, type=int)
+    parser.add_argument('--epochs', default=30, type=int)
     parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--seq_length', default=10, type=int)
     

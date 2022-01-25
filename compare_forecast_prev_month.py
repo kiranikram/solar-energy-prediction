@@ -33,7 +33,7 @@ def main():
     args = get_args_parser()
 
     APPLICATION = 'transfomer_{}_{}'.format(args.epochs, MODEL_NUM_LAYERS)
-    data_path = os.path.join(PATH, 'data', 'sunrock_clean_spring_test.csv')
+    data_path = os.path.join(PATH, 'data', 'sunrock_clean_spring_all.csv')
 
     model = Transformer(feature_size=MODEL_FEATURE_SIZE, num_layers=MODEL_NUM_LAYERS, dropout=0, emb_sizes=EMBEDDING_SIZES_TRANSFORMERS).double().to(DEVICE)
 
@@ -42,28 +42,46 @@ def main():
     model = model.to(DEVICE)
     model.eval()
 
+    df = pd.read_csv(data_path)
+    df['DateTime'] = pd.to_datetime(df['DateTime'])
 
-    dataset_params = {
-        'data_path': data_path,
-        'seq_length' : args.seq_length,
-        'device' : DEVICE,
-        'features' : TRANSFOMERS_FEATURES,
-        'categorical_features' : CATEGORICAL_FEATURES,
-        'output_feature' : OUTPUT_FEATURE
-    }
-    
-    dataset = DatasetTransformer(**dataset_params)
-    dataloader_params = {'shuffle': False, 'batch_size': args.batch_size}
-    data_loader = DataLoader(dataset, **dataloader_params)
-    dataiter = iter(data_loader)
+    #dt_march = df[(df['DateTime'] >= datetime.datetime(2018, 3, 1)) & (df['DateTime'] <= datetime.datetime(2018, 3, 31))]
 
-    ground_truth = []
+    dt_march = df[(df['DateTime'].dt.month == 4)]
+    dt_march['Total'] = dt_march['Total'].apply(lambda x: x * 100)
+    march_totals = dt_march['Total'].tolist()
+
+
+    dt_april = df[(df['DateTime'].dt.month == 4)]
+    dt_april.iloc[0, df.columns.get_loc('Total')] = 0
+
+
+    index = 0
     predictions = []
-    x_labels = []
-    data_df = pd.read_csv(data_path)
-    data_df['DateTime'] = pd.to_datetime(data_df['DateTime'], format='%Y-%m-%d %H:%M')
-    x_labels = data_df['DateTime'].tolist()
+    y_1 = torch.tensor([0]).double().to(DEVICE)
 
+    for idx_ptu, row_ptu in dt_april.iterrows():
+
+        if(index > 0):
+            y_1 = torch.tensor([row_ptu.Total]).double().to(DEVICE)
+
+        X = torch.tensor([row_ptu.sin_day, row_ptu.cos_day, row_ptu.sin_month, row_ptu.cos_month, row_ptu.sin_hour, row_ptu.cos_hour, row_ptu.sin_min, row_ptu.cos_min, y_1])
+        X = X.float().to(DEVICE)
+        X_Emb = torch.tensor([row_ptu.day, row_ptu.month, row_ptu.hour, row_ptu.minute]).long().to(DEVICE)
+
+        X= X.unsqueeze(0).unsqueeze(0)
+        X_Emb = X_Emb.unsqueeze(0).unsqueeze(0)
+        
+        y_1 = model(X, X_Emb, DEVICE)
+
+        predictions.append(y_1.item()  * 100)
+
+        if(idx_ptu == 0 and index < len(df) - 1):
+            df.iloc[index + 1, df.columns.get_loc('Total')] = y_1.item()
+
+        index += 1
+
+    x_labels = dt_april['DateTime'].tolist()
     x_labels_spaced = []
     i = 0
     for label in x_labels:
@@ -73,33 +91,13 @@ def main():
             x_labels_spaced.append('')
         i += 1
 
-    for i in range(len(dataiter)):
-        X, X_Emb, y = dataiter.next()
-        
-        X = X.to(DEVICE).float()
-        X_Emb = X_Emb.to(DEVICE)
-        y = y.to(DEVICE).double()
-
-        prediction = model(X, X_Emb, DEVICE)
-
-        ground_truth.append(y.item())
-        predictions.append(prediction.item())
-
-
-    mse = mean_squared_error(ground_truth, predictions)
-    rmse = sqrt(mse)
-
-    print("RMSE: {}".format(rmse))
-
     #Normalise the data
-    ground_truth = [x * 100 for x in ground_truth]
-    predictions = [x * 100 for x in predictions]
 
-    plt.title('Predictions vs. Ground Truth')
+    plt.title('April 2020 vs. Forecasted April 2021')
     plt.autoscale(axis='x', tight=True)
     plt.xticks(ticks=range(0,len(x_labels_spaced)) ,labels=x_labels_spaced, rotation = 45)
-    plt.plot(ground_truth, label='Ground truth')
-    plt.plot(predictions, label='Predictions')
+    plt.plot(march_totals, label='April 2020')
+    plt.plot(predictions, label='Forecasted April 2021')
     plt.legend()
     plt.show()
 
