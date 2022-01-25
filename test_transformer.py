@@ -11,6 +11,8 @@ from torch.utils.data import  DataLoader
 from datasets.dataset_transformer import DatasetTransformer
 from lib.constants import *
 from models.transformer import Transformer
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 
 PATH  =  os.path.dirname(os.path.abspath(__file__))
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -55,7 +57,14 @@ def main():
     data_loader = DataLoader(dataset, **dataloader_params)
     dataiter = iter(data_loader)
 
-    for i in range(1):
+    ground_truth = []
+    predictions = []
+    x_labels = []
+    data_df = pd.read_csv(data_path)
+    data_df['DateTime'] = pd.to_datetime(data_df['DateTime'], format='%Y-%m-%d %H:%M')
+    x_labels = data_df['DateTime'].tolist()
+
+    for i in range(len(dataiter)):
         X, X_Emb, y = dataiter.next()
         
         X = X.to(DEVICE).float()
@@ -64,9 +73,34 @@ def main():
 
         prediction = model(X, X_Emb, DEVICE)
 
-        print(prediction.item())
+        ground_truth.append(y.item())
+        predictions.append(prediction.item())
 
-        x = 1
+
+    mse = mean_squared_error(ground_truth, predictions)
+    rmse = sqrt(mse)
+
+    print("RMSE: {}".format(rmse))
+
+    #Normalise the data
+    ground_truth = [x * 100 for x in ground_truth]
+    predictions = [x * 100 for x in predictions]
+
+    plt.title('Predicitons vs. Ground Truth')
+    #plt.ylabel('Solar energy production (kWh).')
+    plt.grid(True)
+    plt.autoscale(axis='x', tight=True)
+
+    #plt.xticklabels(x_labels, rotation = 90)
+    
+    plt.xticks(ticks=range(0,len(x_labels)) ,labels=x_labels, rotation = 45)
+
+    plt.plot(ground_truth, label='Ground truth')
+    plt.plot(predictions, label='Predictions')
+    plt.legend()
+    plt.show()
+
+    x =1
 
   
 if __name__ == "__main__":
