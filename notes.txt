@@ -5,6 +5,9 @@ sbatch train.sh
 sbatch predict_transformer.sh
 sbatch train_transformer.sh
 
+dos2unix hy.sh
+sbatch hy.sh
+
 
 
     for i in range(100):
